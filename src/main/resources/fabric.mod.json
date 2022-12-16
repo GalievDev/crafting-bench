@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "craftingbench",
+  "version": "${version}",
+  "name": "Crafting Bench",
+  "description": "A utility mod that adds a custom crafting table with semi-automatic crafting.",
+  "authors": [
+    "D4rkness_King"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/crafting-bench",
+    "sources": "https://github.com/lucaargolo/crafting-bench",
+    "issues": "https://github.com/lucaargolo/crafting-bench/issues"
+  },
+  "license": "Mozilla Public License 2.0",
+  "icon": "assets/craftingbench/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      {
+        "value": "io.github.lucaargolo.craftingbench.client.CraftingBenchClient",
+        "adapter": "kotlin"
+      }
+    ],
+    "main": [
+      {
+        "value": "io.github.lucaargolo.craftingbench.CraftingBench",
+        "adapter": "kotlin"
+      }
+    ]
+  },
+  "mixins": [
+    "craftingbench.mixin.json"
+  ],
+  "accessWidener": "craftingbench.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.14.8",
+    "fabric": ">=0.58.0+1.18",
+    "fabric-language-kotlin": ">=1.8.0+kotlin.1.7.0",
+    "minecraft": "1.18.x"
+  }
+}
