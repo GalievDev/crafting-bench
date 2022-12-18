@@ -16,17 +16,19 @@ import net.minecraft.world.World
 
 
 class TestRecipe(
-    idIn: Identifier, ingredientIn: DefaultedList<Ingredient>,
+    idIn: Identifier, tier: Int, ingredientIn: DefaultedList<Ingredient>,
     resultIn: ItemStack, experienceIn: Float, time: Int
 ) : Recipe<SimpleInventory> {
     private val id: Identifier
+    private val tier: Int
     private val ingredient: DefaultedList<Ingredient>
-    val result: ItemStack
-    val experience: Float
-    val time: Int
+    private val result: ItemStack
+    private val experience: Float
+    private val time: Int
 
     init {
         id = idIn
+        this.tier = tier
         ingredient = ingredientIn
         result = resultIn
         experience = experienceIn
@@ -81,6 +83,7 @@ class TestRecipe(
                 ", result=" + result +
                 ", experience=" + experience +
                 ", time=" + time +
+                ", tier=" + tier +
                 '}'
     }
 
@@ -92,6 +95,7 @@ class TestRecipe(
     class Serializer : RecipeSerializer<TestRecipe> {
 
         override fun read(id: Identifier, jsonObject: JsonObject): TestRecipe {
+            val tier: Int = JsonHelper.asInt(jsonObject, "tier")
             val jsonIngredient: JsonElement =
                 if (JsonHelper.hasArray(jsonObject, "ingredients")) JsonHelper.asArray(
                     jsonObject,
@@ -108,18 +112,20 @@ class TestRecipe(
             val experience: Float = JsonHelper.asFloat(jsonObject, "xp")
             val time: Int = JsonHelper.asInt(jsonObject, "time")
 
-            return TestRecipe(id, ingredient, result, experience, time)
+            return TestRecipe(id, tier, ingredient, result, experience, time)
         }
 
         override fun read(id: Identifier, pBuffer: PacketByteBuf): TestRecipe {
+            val tier: Int = pBuffer.readInt()
             val ingredient = DefaultedList.ofSize(pBuffer.readInt(), Ingredient.fromPacket(pBuffer))
             val itemStack: ItemStack = pBuffer.readItemStack()
             val xp: Float = pBuffer.readFloat()
             val time: Int = pBuffer.readInt()
-            return TestRecipe(id, ingredient, itemStack, xp, time)
+            return TestRecipe(id, tier, ingredient, itemStack, xp, time)
         }
 
         override fun write(pBuffer: PacketByteBuf, pRecipe: TestRecipe) {
+            pBuffer.writeVarInt(pRecipe.tier)
             for (ing in pRecipe.ingredients) {
                 ing.write(pBuffer)
             }
