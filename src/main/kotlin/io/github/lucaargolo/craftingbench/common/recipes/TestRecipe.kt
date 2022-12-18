@@ -98,7 +98,7 @@ class TestRecipe(
                     "ingredients"
                 ) else JsonHelper.asArray(jsonObject, "ingredients")
             val ingredient = DefaultedList.ofSize(9, Ingredient.fromJson(jsonIngredient))
-            if (!jsonObject.has("result")) throw JsonSyntaxException("com.google.gson.JsonSyntaxException; " + TestRecipeSerializer::class.java + "; - have a message: \"RECIPE CANT BEEN CREATED! MISSING THIS ARGUMENT: 'result'\"")
+            if (!jsonObject.has("result")) throw JsonSyntaxException("com.google.gson.JsonSyntaxException; " + Serializer::class.java + "; - have a message: \"RECIPE CANT BEEN CREATED! MISSING THIS ARGUMENT: 'result'\"")
             val result: ItemStack =
                 if (jsonObject["result"].isJsonObject) ShapedRecipe.outputFromJson(JsonHelper.asObject(jsonObject, "result")) else {
                     val string: String = JsonHelper.asString(jsonObject, "result")
