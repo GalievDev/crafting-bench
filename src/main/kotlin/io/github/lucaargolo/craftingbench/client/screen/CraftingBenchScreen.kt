@@ -1,6 +1,7 @@
 package io.github.lucaargolo.craftingbench.client.screen
 
 import com.mojang.blaze3d.systems.RenderSystem
+import io.github.lucaargolo.craftingbench.CraftingBench
 import io.github.lucaargolo.craftingbench.common.screenhandler.CraftingBenchScreenHandler
 import io.github.lucaargolo.craftingbench.utils.ModIdentifier
 import it.unimi.dsi.fastutil.ints.IntList
@@ -357,25 +358,19 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                     (1..36).forEach { pSlots ->
                         val playerItems = playerInventory?.getStack(pSlots)
                         if (ItemStack.areItemsEqual(inputs, playerItems) && !inputs.isEmpty && !playerItems?.isEmpty!!) {
-                            val output = ItemStack(recipe.output.item, recipe.output.count)
-                            if (playerItems.item.maxCount == inputs.item.maxCount) {
-                                val playerInputSlot = playerInventory.getSlotWithStack(inputs)
-                                val playerOutputSlot = playerInventory.getSlotWithStack(output)
-                                client?.player?.inventory?.removeStack(playerInputSlot, inputs.count)
-                                pHandler?.slots?.get(playerInventory.emptySlot)?.onTakeItem(client?.player, output)
-/*                                pHandler?.sendContentUpdates()
-                                if (!playerInventory.isEmpty && playerItems == output) {
-                                    val updateOutput = ItemStack(output.item, output.count + output.count)
-                                    playerInventory.setStack(playerOutputSlot, updateOutput)
-                                    pHandler?.sendContentUpdates()
-                                    handler.sendContentUpdates()
-                                } else if (!playerInventory.isEmpty) {
-                                    playerInventory.setStack(playerInventory.emptySlot, output)
-                                    pHandler?.sendContentUpdates()
-                                    handler.sendContentUpdates()
-                                }*/
+                            val output = ItemStack(recipe.output.item)
+                            val playerInputSlot = playerInventory.getSlotWithStack(inputs)
+                            CraftingBench.LOGGER.info("Input slots: $playerInputSlot")
+                            val playerOutputSlot = playerInventory.getSlotWithStack(output)
+                            client?.player?.inventory?.removeStack(playerInputSlot, inputs.count + 1)
+                            if (!playerInventory.isEmpty && playerItems == output) {
+                                val updateOutput = ItemStack(output.item, output.count + output.count)
+                                playerInventory.setStack(playerOutputSlot, updateOutput)
+                            } else if (!playerInventory.isEmpty) {
+                                playerInventory.setStack(playerInventory.emptySlot, output)
                             }
                         }
+                        pHandler?.sendContentUpdates()
                     }
                 }
             }

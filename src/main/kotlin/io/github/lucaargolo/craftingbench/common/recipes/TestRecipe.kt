@@ -15,10 +15,10 @@ abstract class TestRecipe(
     resultIn: ItemStack, experienceIn: Float, time: Int
 ) : Recipe<SimpleInventory> {
     private val id: Identifier
-    private val ingredient: DefaultedList<Ingredient>
+    val ingredient: DefaultedList<Ingredient>
     val result: ItemStack
-    private val experience: Float
-    private val time: Int
+    val experience: Float
+    val time: Int
 
     init {
         id = idIn
