@@ -3,6 +3,7 @@ package io.github.lucaargolo.craftingbench
 import io.github.lucaargolo.craftingbench.common.block.BlockCompendium
 import io.github.lucaargolo.craftingbench.common.blockentity.BlockEntityCompendium
 import io.github.lucaargolo.craftingbench.common.item.ItemCompendium
+import io.github.lucaargolo.craftingbench.common.recipes.RecipeReg
 import io.github.lucaargolo.craftingbench.common.screenhandler.ScreenHandlerCompendium
 import io.github.lucaargolo.craftingbench.mixin.SimpleInventoryAccessor
 import io.github.lucaargolo.craftingbench.utils.ModIdentifier
@@ -30,6 +31,7 @@ object CraftingBench: ModInitializer {
         ItemCompendium.initialize()
         BlockEntityCompendium.initialize()
         ScreenHandlerCompendium.initialize()
+        RecipeReg.registerRecipes()
     }
 
     fun creativeGroupSettings(): Item.Settings = Item.Settings().group(creativeTab).rarity(Rarity.UNCOMMON)
