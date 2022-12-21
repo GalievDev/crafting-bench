@@ -3,7 +3,6 @@ package io.github.lucaargolo.craftingbench.common.recipes
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
-import com.sun.org.apache.xml.internal.serializer.SerializerFactory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
@@ -16,23 +15,23 @@ import net.minecraft.world.World
 
 
 class TestRecipe(
-    idIn: Identifier, tier: Int, ingredientIn: DefaultedList<Ingredient>,
-    resultIn: ItemStack, experienceIn: Float, time: Int
+    idIn: Identifier, tier: Int, experienceIn: Float, time: Int, ingredientIn: DefaultedList<Ingredient>,
+    resultIn: ItemStack
 ) : Recipe<SimpleInventory> {
     private val id: Identifier
     private val tier: Int
-    private val ingredient: DefaultedList<Ingredient>
-    private val result: ItemStack
     private val experience: Float
     private val time: Int
+    private val ingredient: DefaultedList<Ingredient>
+    private val result: ItemStack
 
     init {
         id = idIn
         this.tier = tier
-        ingredient = ingredientIn
-        result = resultIn
         experience = experienceIn
         this.time = time
+        ingredient = ingredientIn
+        result = resultIn
     }
 
     override fun matches(pContainer: SimpleInventory?, pLevel: World?): Boolean {
@@ -79,11 +78,11 @@ class TestRecipe(
         return "TestRecipe{" +
                 "type=" + type +
                 ", id=" + id +
-                ", ingredient=" + ingredient +
-                ", result=" + result +
                 ", experience=" + experience +
                 ", time=" + time +
                 ", tier=" + tier +
+                ", ingredient=" + ingredient +
+                ", result=" + result +
                 '}'
     }
 
@@ -95,43 +94,43 @@ class TestRecipe(
     class Serializer : RecipeSerializer<TestRecipe> {
 
         override fun read(id: Identifier, jsonObject: JsonObject): TestRecipe {
-            val tier: Int = JsonHelper.asInt(jsonObject, "tier")
+            val tier: Int = JsonHelper.getInt(jsonObject, "tier")
+            val experience: Float = JsonHelper.getFloat(jsonObject, "xp")
+            val time: Int = JsonHelper.getInt(jsonObject, "time")
             val jsonIngredient: JsonElement =
-                if (JsonHelper.hasArray(jsonObject, "ingredients")) JsonHelper.asArray(
-                    jsonObject,
-                    "ingredients"
-                ) else JsonHelper.asArray(jsonObject, "ingredients")
+                if (JsonHelper.hasArray(jsonObject, "ingredients"))
+                    JsonHelper.getArray(jsonObject, "ingredients")
+                else JsonHelper.getArray(jsonObject, "ingredients")
             val ingredient = DefaultedList.ofSize(9, Ingredient.fromJson(jsonIngredient))
-            if (!jsonObject.has("result")) throw JsonSyntaxException("com.google.gson.JsonSyntaxException; " + Serializer::class.java + "; - have a message: \"RECIPE CANT BEEN CREATED! MISSING THIS ARGUMENT: 'result'\"")
+            if (!jsonObject.has("result"))
+                throw JsonSyntaxException("com.google.gson.JsonSyntaxException; " + Serializer::class + "; - have a message: \"RECIPE CANT BEEN CREATED! MISSING THIS ARGUMENT: 'result'\"")
             val result: ItemStack =
-                if (jsonObject["result"].isJsonObject) ShapedRecipe.outputFromJson(JsonHelper.asObject(jsonObject, "result")) else {
-                    val string: String = JsonHelper.asString(jsonObject, "result")
+                if (jsonObject["result"].isJsonObject) ShapedRecipe.outputFromJson(JsonHelper.getObject(jsonObject, "result")) else {
+                    val string: String = JsonHelper.getString(jsonObject, "result")
                     val location = Identifier(string)
                     ItemStack(Registry.ITEM.get(location))
                 }
-            val experience: Float = JsonHelper.asFloat(jsonObject, "xp")
-            val time: Int = JsonHelper.asInt(jsonObject, "time")
 
-            return TestRecipe(id, tier, ingredient, result, experience, time)
+            return TestRecipe(id, tier, experience, time, ingredient, result)
         }
 
         override fun read(id: Identifier, pBuffer: PacketByteBuf): TestRecipe {
             val tier: Int = pBuffer.readInt()
-            val ingredient = DefaultedList.ofSize(pBuffer.readInt(), Ingredient.fromPacket(pBuffer))
-            val itemStack: ItemStack = pBuffer.readItemStack()
             val xp: Float = pBuffer.readFloat()
             val time: Int = pBuffer.readInt()
-            return TestRecipe(id, tier, ingredient, itemStack, xp, time)
+            val ingredient = DefaultedList.ofSize(pBuffer.readInt(), Ingredient.fromPacket(pBuffer))
+            val itemStack: ItemStack = pBuffer.readItemStack()
+            return TestRecipe(id, tier,  xp, time, ingredient, itemStack)
         }
 
         override fun write(pBuffer: PacketByteBuf, pRecipe: TestRecipe) {
             pBuffer.writeVarInt(pRecipe.tier)
+            pBuffer.writeFloat(pRecipe.experience)
+            pBuffer.writeVarInt(pRecipe.time)
             for (ing in pRecipe.ingredients) {
                 ing.write(pBuffer)
             }
             pBuffer.writeItemStack(pRecipe.result)
-            pBuffer.writeFloat(pRecipe.experience)
-            pBuffer.writeVarInt(pRecipe.time)
         }
 
         companion object {

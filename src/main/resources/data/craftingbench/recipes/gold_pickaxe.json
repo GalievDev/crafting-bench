@@ -1,0 +1,23 @@
+{
+  "type": "craftingbench:test",
+  "tier": 1,
+  "xp": 100,
+  "time": 100,
+  "ingredients": [
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "minecraft:stone_pickaxe"
+    }
+  ],
+  "result": {
+    "item": "minecraft:golden_pickaxe"
+  }
+}
