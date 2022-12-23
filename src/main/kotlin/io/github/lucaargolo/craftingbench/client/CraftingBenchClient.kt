@@ -4,6 +4,7 @@ import io.github.lucaargolo.craftingbench.CraftingBench
 import io.github.lucaargolo.craftingbench.common.block.BlockCompendium
 import io.github.lucaargolo.craftingbench.common.blockentity.BlockEntityCompendium
 import io.github.lucaargolo.craftingbench.common.item.ItemCompendium
+import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import io.github.lucaargolo.craftingbench.common.screenhandler.ScreenHandlerCompendium
 import io.github.lucaargolo.craftingbench.mixin.RecipeManagerInvoker
 import io.github.lucaargolo.craftingbench.utils.RecipeTree
@@ -17,10 +18,10 @@ import kotlin.system.measureTimeMillis
 
 object CraftingBenchClient: ClientModInitializer {
 
-    val recipeTrees: MutableMap<CraftingRecipe, RecipeTree> = mutableMapOf()
+    val recipeTrees: MutableMap<TestRecipe, RecipeTree> = mutableMapOf()
     val itemToRecipeTrees: MutableMap<Int, MutableSet<RecipeTree>> = mutableMapOf()
 
-    private val recipesYouCanUseToDoItem: MutableMap<Int, MutableMap<CraftingRecipe, Int>> = mutableMapOf()
+    private val recipesYouCanUseToDoItem: MutableMap<Int, MutableMap<TestRecipe, Int>> = mutableMapOf()
 
     fun onSynchronizeRecipes(recipeManager: RecipeManager) {
         CraftingBench.LOGGER.info("[Crafting Bench] New recipes received, constructing recipe trees...")
@@ -31,18 +32,18 @@ object CraftingBenchClient: ClientModInitializer {
             recipeTrees.clear()
             itemToRecipeTrees.clear()
             recipesYouCanUseToDoItem.clear()
-            val recipes = (recipeManager as RecipeManagerInvoker).invokeGetAllOfType(RecipeType.CRAFTING).values
+            val recipes = (recipeManager as RecipeManagerInvoker).invokeGetAllOfType(TestRecipe.Type).values
             recipes.forEach { recipe ->
-                if (recipe is ShapedRecipe || recipe is ShapelessRecipe) {
+                if (recipe is TestRecipe) {
                     recipesYouCanUseToDoItem.getOrPut(Registry.ITEM.getRawId(recipe.output.item), ::mutableMapOf)[recipe] = recipe.output.count
                 }
             }
-            recipes.forEach(::populateRecipeTree)
+            recipes.map { ::populateRecipeTree }
         }
         CraftingBench.LOGGER.info("[Crafting Bench] Constructed recipe trees in $time ms")
     }
 
-    private fun populateRecipeTree(recipe: CraftingRecipe): RecipeTree {
+    private fun populateRecipeTree(recipe: TestRecipe): RecipeTree {
         return recipeTrees[recipe] ?: let{
             val recipeTree = RecipeTree(recipe)
             val ingredients = recipe.ingredients.map(Ingredient::getMatchingItemIds).let {
@@ -63,7 +64,7 @@ object CraftingBenchClient: ClientModInitializer {
                     itemQntMap[itemId] = (itemQntMap[itemId] ?: 0) + 1
                 }
             }
-            val allRequiredRecipes = mutableMapOf<CraftingRecipe, Int>()
+            val allRequiredRecipes = mutableMapOf<TestRecipe, Int>()
             itemQntMap.forEach { (item, qnt) ->
                 recipesYouCanUseToDoItem[item]?.let { requiredRecipes ->
                     requiredRecipes.mapValues { entry -> MathHelper.ceil(qnt / entry.value.toFloat()) }.forEach { (a, b) ->
@@ -71,14 +72,14 @@ object CraftingBenchClient: ClientModInitializer {
                     }
                 }
             }
-            populateRecipeTree(recipe, recipeTree, listOf(recipe), ingredients, allRequiredRecipes)
+            populateRecipeTreeFun(recipe, recipeTree, listOf(recipe), ingredients, allRequiredRecipes)
             //The end
             recipeTrees[recipe] = recipeTree
             recipeTree
         }
     }
 
-    private fun populateRecipeTree(originalRecipe: CraftingRecipe, recipeTree: RecipeTree, originalRecipeHistory: List<CraftingRecipe>, originalIngredients: List<IntList>, requiredRecipes: Map<CraftingRecipe, Int>) {
+    private fun populateRecipeTreeFun(originalRecipe: TestRecipe, recipeTree: RecipeTree, originalRecipeHistory: List<TestRecipe>, originalIngredients: List<IntList>, requiredRecipes: Map<TestRecipe, Int>) {
 
         requiredRecipes.forEach { (recipe, qnt) ->
             val recipeHistory = originalRecipeHistory.toMutableList()
@@ -115,7 +116,7 @@ object CraftingBenchClient: ClientModInitializer {
                     itemQntMap[itemId] = (itemQntMap[itemId] ?: 0) + 1
                 }
             }
-            val allRequiredRecipes = mutableMapOf<CraftingRecipe, Int>()
+            val allRequiredRecipes = mutableMapOf<TestRecipe, Int>()
             itemQntMap.forEach { (item, qnt) ->
                 recipesYouCanUseToDoItem[item]?.let { requiredRecipes ->
                     requiredRecipes.mapValues { entry -> MathHelper.ceil(qnt/entry.value.toFloat()) }.forEach { (a, b) ->

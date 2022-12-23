@@ -3,6 +3,7 @@ package io.github.lucaargolo.craftingbench.common.screenhandler
 import io.github.lucaargolo.craftingbench.CraftingBench
 import io.github.lucaargolo.craftingbench.client.CraftingBenchClient
 import io.github.lucaargolo.craftingbench.client.screen.CraftingBenchScreen
+import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import io.github.lucaargolo.craftingbench.utils.RecipeTree
 import io.github.lucaargolo.craftingbench.utils.SimpleCraftingInventory
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap
@@ -31,15 +32,13 @@ import net.minecraft.world.World
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
-class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: PlayerInventory, simpleCraftingInventory: SimpleInventory, val inventory: SimpleInventory, private val context: ScreenHandlerContext) : AbstractRecipeScreenHandler<CraftingInventory>(ScreenHandlerCompendium.CRAFTING_BENCH, syncId) {
+class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: PlayerInventory, simpleCraftingInventory: SimpleInventory, val inventory: SimpleInventory, private val context: ScreenHandlerContext) : ScreenHandler(ScreenHandlerCompendium.CRAFTING_BENCH, syncId) {
 
     constructor(syncId: Int, playerInventory: PlayerInventory, context: ScreenHandlerContext): this(syncId, playerInventory, SimpleInventory(9), SimpleInventory(28), context)
 
     private val recipeFinder = RecipeFinder()
-    private val craftingInventory = SimpleCraftingInventory(this, 3, 3, simpleCraftingInventory)
-    private val result = CraftingResultInventory()
 
-    val craftableRecipes = mutableMapOf<CraftingRecipe, Pair<List<CraftingRecipe>, List<IntList>>>()
+    val craftableRecipes = mutableMapOf<TestRecipe, Pair<List<TestRecipe>, List<IntList>>>()
     val combinedInventory = object: Inventory {
         override fun clear() {
             playerInventory.clear()
@@ -136,7 +135,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
         }
     }
 
-    private fun updateResult(handler: ScreenHandler, world: World, player: PlayerEntity, craftingInventory: CraftingInventory, resultInventory: CraftingResultInventory) {
+/*    private fun updateResult(handler: ScreenHandler, world: World, player: PlayerEntity, craftingInventory: CraftingInventory, resultInventory: CraftingResultInventory) {
         if (!world.isClient) {
             val serverPlayerEntity = player as? ServerPlayerEntity
             var itemStack = ItemStack.EMPTY
@@ -152,12 +151,10 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
             handler.setPreviousTrackedSlot(0, itemStack)
             serverPlayerEntity?.networkHandler?.sendPacket(ScreenHandlerSlotUpdateS2CPacket(handler.syncId, handler.nextRevision(), 0, itemStack))
         }
-    }
+    }*/
 
     override fun onContentChanged(inventory: Inventory?) {
-        context.run { world, _ ->
-            updateResult(this, world, playerInventory.player, craftingInventory, result)
-        }
+        sendContentUpdates()
     }
 
     override fun transferSlot(player: PlayerEntity?, index: Int): ItemStack {
@@ -207,14 +204,14 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
        }, true)
     }
 
-    override fun populateRecipeFinder(finder: RecipeMatcher) {
+/*    override fun populateRecipeFinder(finder: RecipeMatcher) {
         repeat(inventory.size()) { slot ->
             finder.addUnenchantedInput(inventory.getStack(slot))
         }
         craftingInventory.provideRecipeInputs(finder)
-    }
+    }*/
 
-    override fun clearCraftingSlots() {
+/*    override fun clearCraftingSlots() {
         craftingInventory.clear()
         result.clear()
     }
@@ -233,8 +230,9 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
 
     override fun getCraftingHeight(): Int {
         return craftingInventory.height
-    }
+    }*/
 
+/*
     override fun getCraftingSlotCount(): Int {
         return 10
     }
@@ -248,6 +246,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
     override fun canInsertIntoSlot(index: Int): Boolean {
         return index != craftingResultSlotIndex
     }
+*/
 
     override fun close(player: PlayerEntity) {
         super.close(player)
@@ -301,7 +300,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
         }
 
         override fun run() {
-            val newCraftableRecipes = mutableMapOf<CraftingRecipe, Pair<List<CraftingRecipe>, List<IntList>>>()
+            val newCraftableRecipes = mutableMapOf<TestRecipe, Pair<List<TestRecipe>, List<IntList>>>()
             val possibleRecipeTrees = mutableSetOf<RecipeTree>()
 
             if(state == State.RESTARTING) {

@@ -1,12 +1,13 @@
 package io.github.lucaargolo.craftingbench.utils
 
 import io.github.lucaargolo.craftingbench.client.CraftingBenchClient
+import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import it.unimi.dsi.fastutil.ints.IntList
 import net.minecraft.recipe.CraftingRecipe
 import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.util.Identifier
 
-class RecipeTree(val recipe: CraftingRecipe) {
+class RecipeTree(val recipe: TestRecipe) {
 
     private val branchesList = mutableListOf<Branch>()
 
@@ -65,17 +66,17 @@ class RecipeTree(val recipe: CraftingRecipe) {
         }
     }
 
-    fun branch(recipeHistory: List<CraftingRecipe>, ingredients: List<IntList>): Branch {
+    fun branch(recipeHistory: List<TestRecipe>, ingredients: List<IntList>): Branch {
         val branch = Branch(this, recipeHistory, ingredients)
         branchesList.add(branch)
         return branch
     }
 
-    class Branch(val parent: RecipeTree, val recipeHistory: List<CraftingRecipe>, val ingredients: List<IntList>) {
+    class Branch(val parent: RecipeTree, val recipeHistory: List<TestRecipe>, val ingredients: List<IntList>) {
 
-        private val nestedList: MutableList<Pair<CraftingRecipe, Int>> = mutableListOf()
+        private val nestedList: MutableList<Pair<TestRecipe, Int>> = mutableListOf()
 
-        fun nest(requiredRecipe: CraftingRecipe, requiredQnt: Int) {
+        fun nest(requiredRecipe: TestRecipe, requiredQnt: Int) {
             nestedList.add(Pair(requiredRecipe, requiredQnt))
         }
 
@@ -85,7 +86,7 @@ class RecipeTree(val recipe: CraftingRecipe) {
             val innerRecipeHistory = nestedBranch.recipeHistory
             val innerIngredients = nestedBranch.ingredients
 
-            val combinedRecipeHistory = mutableListOf<CraftingRecipe>()
+            val combinedRecipeHistory = mutableListOf<TestRecipe>()
             repeat(requiredQnt) {
                 combinedRecipeHistory.addAll(innerRecipeHistory)
             }

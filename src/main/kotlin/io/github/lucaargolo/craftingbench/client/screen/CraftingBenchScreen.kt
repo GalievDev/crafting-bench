@@ -367,7 +367,8 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                                 val updateOutput = ItemStack(output.item, output.count + output.count)
                                 playerInventory.setStack(playerOutputSlot, updateOutput)
                             } else if (!playerInventory.isEmpty) {
-                                playerInventory.setStack(playerInventory.emptySlot, output)
+                                val emptySlot = playerInventory.emptySlot
+                                playerInventory.setStack(emptySlot, output)
                             }
                         }
                         pHandler?.sendContentUpdates()

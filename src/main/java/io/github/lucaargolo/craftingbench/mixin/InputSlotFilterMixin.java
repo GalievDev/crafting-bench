@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.InputSlotFiller;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InputSlotFiller.class)
 public class InputSlotFilterMixin<C extends Inventory> {
 
-    @Shadow protected AbstractRecipeScreenHandler<C> handler;
+    @Shadow protected ScreenHandler handler;
 
     @Inject(at = @At("HEAD"), method = "fillInputSlots(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/recipe/Recipe;Z)V")
     public void unlockUnknownRecipe(ServerPlayerEntity entity, Recipe<C> recipe, boolean craftAll, CallbackInfo ci) {
