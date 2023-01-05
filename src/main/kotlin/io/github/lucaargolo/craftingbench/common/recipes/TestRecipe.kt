@@ -56,6 +56,10 @@ class TestRecipe(
         return true
     }
 
+    override fun isIgnoredInRecipeBook(): Boolean {
+        return true
+    }
+
     override fun craft(inventory: SimpleInventory?): ItemStack {
         return result
     }
@@ -74,6 +78,8 @@ class TestRecipe(
         return Serializer.INSTANCE
     }
 
+
+
     override fun toString(): String {
         return "TestRecipe{" +
                 "type=" + type +
@@ -88,7 +94,7 @@ class TestRecipe(
 
     object Type : RecipeType<TestRecipe?> {
         val INSTANCE: Type = Type
-        const val ID = "test"
+        const val ID = "test_1"
     }
 
     class Serializer : RecipeSerializer<TestRecipe> {
@@ -135,7 +141,7 @@ class TestRecipe(
 
         companion object {
             val INSTANCE = Serializer()
-            const val ID = "test"
+            const val ID = "test_1"
         }
     }
 }

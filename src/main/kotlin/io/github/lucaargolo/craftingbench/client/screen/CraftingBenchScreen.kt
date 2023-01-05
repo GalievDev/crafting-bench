@@ -2,6 +2,7 @@ package io.github.lucaargolo.craftingbench.client.screen
 
 import com.mojang.blaze3d.systems.RenderSystem
 import io.github.lucaargolo.craftingbench.CraftingBench
+import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import io.github.lucaargolo.craftingbench.common.screenhandler.CraftingBenchScreenHandler
 import io.github.lucaargolo.craftingbench.utils.ModIdentifier
 import it.unimi.dsi.fastutil.ints.IntList
@@ -20,8 +21,6 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.Recipe
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
@@ -45,7 +44,7 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
     private var craftings: MutableList<CraftingButtonWidget> = mutableListOf()
     private var searchBar: TextFieldWidget? = null
     private var count: TextFieldWidget? = null
-    private val pHandler: PlayerScreenHandler? = null
+    private val pHandler: PlayerScreenHandler? = client?.player?.playerScreenHandler
 
     //Variables used for the scroll logic
     private val craftingsHeight = linkedMapOf<ButtonWidget, Int>()
@@ -146,7 +145,8 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                 filter == "" -> true
                 itemId.path.replace("_", " ").contains(filter) -> true
                 recipe.output.item.name.string.lowercase().contains(filter) -> true
-                recipe.output.getTooltip(null, TooltipContext.Default.NORMAL).filter { it.string.lowercase().contains(filter) }.isNotEmpty() -> true
+                recipe.output.getTooltip(null, TooltipContext.Default.NORMAL)
+                    .any { it.string.lowercase().contains(filter) } -> true
                 filter.startsWith("@") && itemId.namespace.contains(filter.substring(1)) -> true
                 else -> false
             }
@@ -430,7 +430,7 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
         }
     }
 
-    inner class CraftingButtonWidget(private val handler: CraftingBenchScreenHandler, x: Int, y: Int, width: Int, height: Int, val recipe: Recipe<*>, val recipeHistory: List<Recipe<*>>, val requiredItems: List<IntList>, onPressAction: PressAction) : ButtonWidget(x, y, width, height, Text.of(""), onPressAction) {
+    inner class CraftingButtonWidget(private val handler: CraftingBenchScreenHandler, x: Int, y: Int, width: Int, height: Int, val recipe: TestRecipe, val recipeHistory: List<TestRecipe>, private val requiredItems: List<IntList>, onPressAction: PressAction) : ButtonWidget(x, y, width, height, Text.of(""), onPressAction) {
 
         private val client = MinecraftClient.getInstance()
 
@@ -508,7 +508,6 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
         }
 
     }
-
 
     companion object {
         private val TEXTURE = ModIdentifier("textures/gui/crafting_bench.png")

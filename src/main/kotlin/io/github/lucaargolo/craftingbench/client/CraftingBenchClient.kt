@@ -11,7 +11,9 @@ import io.github.lucaargolo.craftingbench.utils.RecipeTree
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntList
 import net.fabricmc.api.ClientModInitializer
-import net.minecraft.recipe.*
+import net.minecraft.recipe.Ingredient
+import net.minecraft.recipe.RecipeManager
+import net.minecraft.recipe.RecipeMatcher
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.registry.Registry
 import kotlin.system.measureTimeMillis
@@ -47,7 +49,8 @@ object CraftingBenchClient: ClientModInitializer {
         return recipeTrees[recipe] ?: let{
             val recipeTree = RecipeTree(recipe)
             val ingredients = recipe.ingredients.map(Ingredient::getMatchingItemIds).let {
-                if(CraftingBench.NBTCRAFTING) it.map { IntArrayList().also { realIntList -> it.forEach { itemId -> realIntList.add(Registry.ITEM.getRawId(RecipeMatcher.getStackFromId(itemId).item)) } } } else it
+                if(CraftingBench.NBTCRAFTING) it.map { IntArrayList().also { realIntList -> it.forEach { itemId -> realIntList.add(Registry.ITEM.getRawId(
+                    RecipeMatcher.getStackFromId(itemId).item)) } } } else it
             }
             //First path
             recipeTree.branch(listOf(recipe), ingredients)

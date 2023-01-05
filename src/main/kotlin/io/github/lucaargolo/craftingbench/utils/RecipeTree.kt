@@ -3,9 +3,7 @@ package io.github.lucaargolo.craftingbench.utils
 import io.github.lucaargolo.craftingbench.client.CraftingBenchClient
 import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import it.unimi.dsi.fastutil.ints.IntList
-import net.minecraft.recipe.CraftingRecipe
 import net.minecraft.recipe.RecipeMatcher
-import net.minecraft.util.Identifier
 
 class RecipeTree(val recipe: TestRecipe) {
 
@@ -50,7 +48,6 @@ class RecipeTree(val recipe: TestRecipe) {
                                 nestedIterator = iterator
                                 nestedIteratorMultiplier = pair.second
                             }
-                        }else{
                         }
                     }
 

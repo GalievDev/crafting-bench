@@ -5,7 +5,6 @@ import net.minecraft.recipe.RecipeSerializer
 import net.minecraft.recipe.RecipeType
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
-import java.util.function.Supplier
 
 object RecipeReg {
     fun registerRecipes() {
