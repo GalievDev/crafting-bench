@@ -351,5 +351,4 @@ class CraftingBenchBlock(settings: Settings) : BlockWithEntity(settings) {
             override fun asString() = name.lowercase()
         }
     }
-
 }

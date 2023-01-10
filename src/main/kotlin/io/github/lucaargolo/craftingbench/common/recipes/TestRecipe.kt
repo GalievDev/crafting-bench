@@ -64,7 +64,13 @@ class TestRecipe(
         return result.copy()
     }
 
+    fun getTier(): Int {
+        return tier
+    }
 
+    fun getTime(): Int {
+        return time
+    }
 
     override fun getType(): RecipeType<*> {
         return Type.INSTANCE
@@ -73,6 +79,8 @@ class TestRecipe(
     override fun getSerializer(): RecipeSerializer<*> {
         return Serializer.INSTANCE
     }
+
+
 
     override fun toString(): String {
         return "TestRecipe{" +

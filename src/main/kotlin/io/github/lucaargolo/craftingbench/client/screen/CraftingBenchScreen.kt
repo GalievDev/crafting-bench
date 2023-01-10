@@ -2,6 +2,7 @@ package io.github.lucaargolo.craftingbench.client.screen
 
 import com.mojang.blaze3d.systems.RenderSystem
 import io.github.lucaargolo.craftingbench.CraftingBench
+import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import io.github.lucaargolo.craftingbench.common.screenhandler.CraftingBenchScreenHandler
 import io.github.lucaargolo.craftingbench.utils.ModIdentifier
 import it.unimi.dsi.fastutil.ints.IntList
@@ -20,8 +21,6 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.Recipe
 import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
@@ -56,9 +55,8 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
 
     //Variables used for the crafting logic
     private var crafting = false
-    private var craftingProgress = -100
-    private var craftingPartProgress = -100
-    private var timer = 0;
+    private var craftingProgress:Int = 0
+    private var craftingPartProgress = 0
 
     init {
         backgroundWidth = 421
@@ -344,15 +342,13 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
         }
         if(crafting) {
             val selectedCrafting = selectedCrafting ?: return
-/*            if (craftingPartProgress++ == 10) {
-                craftingPartProgress = 0
-            }*/
 
-            if (craftingPartProgress == 0) {
-                val recipe = selectedCrafting.recipe
-                val playerInventory = client?.player?.inventory
-                craftingPartProgress = 10
-
+            while (craftingProgress < selectedCrafting.recipe.getTime()) {
+                craftingProgress++
+            }
+            val recipe = selectedCrafting.recipe
+            val playerInventory = client?.player?.inventory
+            if(recipe.getTier() == handler.getTier()) {
                 (1 until recipe.ingredients.size).forEach { slot ->
                     val inputs = recipe.ingredients[slot].matchingStacks[0]
                     (1..36).forEach { pSlots ->
@@ -374,6 +370,7 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                     }
                 }
             }
+
 
 
             /*           if(craftingPartProgress == 0) {
@@ -429,7 +426,7 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
         }
     }
 
-    inner class CraftingButtonWidget(private val handler: CraftingBenchScreenHandler, x: Int, y: Int, width: Int, height: Int, val recipe: Recipe<*>, val recipeHistory: List<Recipe<*>>, val requiredItems: List<IntList>, onPressAction: PressAction) : ButtonWidget(x, y, width, height, Text.of(""), onPressAction) {
+    inner class CraftingButtonWidget(private val handler: CraftingBenchScreenHandler, x: Int, y: Int, width: Int, height: Int, val recipe: TestRecipe, val recipeHistory: List<TestRecipe>, val requiredItems: List<IntList>, onPressAction: PressAction) : ButtonWidget(x, y, width, height, Text.of(""), onPressAction) {
 
         private val client = MinecraftClient.getInstance()
 

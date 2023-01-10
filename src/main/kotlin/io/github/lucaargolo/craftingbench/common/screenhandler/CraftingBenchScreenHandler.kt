@@ -3,6 +3,7 @@ package io.github.lucaargolo.craftingbench.common.screenhandler
 import io.github.lucaargolo.craftingbench.CraftingBench
 import io.github.lucaargolo.craftingbench.client.CraftingBenchClient
 import io.github.lucaargolo.craftingbench.client.screen.CraftingBenchScreen
+import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import io.github.lucaargolo.craftingbench.utils.RecipeTree
 import io.github.lucaargolo.craftingbench.utils.SimpleCraftingInventory
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap
@@ -17,13 +18,14 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.*
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeMatcher
+import net.minecraft.recipe.RecipeType
 import net.minecraft.recipe.book.RecipeBookCategory
 import net.minecraft.screen.AbstractRecipeScreenHandler
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerListener
-import net.minecraft.screen.slot.CraftingResultSlot
 import net.minecraft.screen.slot.Slot
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.registry.Registry
@@ -39,7 +41,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
     private val craftingInventory = SimpleCraftingInventory(this, 3, 3, simpleCraftingInventory)
     private val result = CraftingResultInventory()
 
-    val craftableRecipes = mutableMapOf<CraftingRecipe, Pair<List<CraftingRecipe>, List<IntList>>>()
+    val craftableRecipes = mutableMapOf<TestRecipe, Pair<List<TestRecipe>, List<IntList>>>()
     val combinedInventory = object: Inventory {
         override fun clear() {
             playerInventory.clear()
@@ -91,6 +93,11 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
             return playerInventory.canPlayerUse(player) && inventory.canPlayerUse(player)
         }
 
+    }
+
+    //Тир
+    fun getTier(): Int {
+        return 1
     }
 
     init {
@@ -240,7 +247,6 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
     }
 
 
-    //И тут надо будет поменять
     override fun getCategory(): RecipeBookCategory {
         return RecipeBookCategory.CRAFTING
     }
@@ -254,7 +260,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
         recipeFinder.stop()
     }
 
-    fun populateRecipes(player: ClientPlayerEntity) {
+    private fun populateRecipes(player: ClientPlayerEntity) {
         recipeFinder.rawItemInv.clear()
         recipeFinder.rawItemInv.defaultReturnValue(0)
         repeat(player.inventory.size()) { slot ->
@@ -301,7 +307,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
         }
 
         override fun run() {
-            val newCraftableRecipes = mutableMapOf<CraftingRecipe, Pair<List<CraftingRecipe>, List<IntList>>>()
+            val newCraftableRecipes = mutableMapOf<TestRecipe, Pair<List<TestRecipe>, List<IntList>>>()
             val possibleRecipeTrees = mutableSetOf<RecipeTree>()
 
             if(state == State.RESTARTING) {
