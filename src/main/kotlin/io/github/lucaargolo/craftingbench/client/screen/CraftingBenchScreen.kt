@@ -359,10 +359,10 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                             CraftingBench.LOGGER.info("Input slots: $playerInputSlot")
                             val playerOutputSlot = playerInventory.getSlotWithStack(output)
                             client?.player?.inventory?.removeStack(playerInputSlot, inputs.count + 1)
-                            if (!playerInventory.isEmpty && playerItems == output) {
+                            if (!playerInventory.isEmpty && playerItems == output && craftingProgress == recipe.getTime()) {
                                 val updateOutput = ItemStack(output.item, output.count + output.count)
                                 playerInventory.setStack(playerOutputSlot, updateOutput)
-                            } else if (!playerInventory.isEmpty) {
+                            } else if (!playerInventory.isEmpty && craftingProgress == recipe.getTime()) {
                                 playerInventory.setStack(playerInventory.emptySlot, output)
                             }
                         }
