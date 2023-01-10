@@ -340,12 +340,14 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
             selectedCrafting?.selected = false
             selectedCrafting = null
         }
+
+        //Тут логика крафта
         if(crafting) {
             val selectedCrafting = selectedCrafting ?: return
-
             while (craftingProgress < selectedCrafting.recipe.getTime()) {
                 craftingProgress++
             }
+
             val recipe = selectedCrafting.recipe
             val playerInventory = client?.player?.inventory
             if(recipe.getTier() == handler.getTier()) {
@@ -370,52 +372,6 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                     }
                 }
             }
-
-
-
-            /*           if(craftingPartProgress == 0) {
-               val recipeHistory = selectedCrafting.recipeHistory
-                if(craftingProgress % 2 == 1) {
-                    val recipe = recipeHistory[(craftingProgress-1)/2]
-                    val output = ItemStack(recipe.output.item, recipe.output.count * 2)
-                    if(handler.slots[0].hasStack() && !handler.slots[0].stack.isEmpty && ItemStack.areEqual(handler.slots[0].stack, recipe.output)) {
-                        client?.interactionManager?.clickSlot(handler.syncId, 0, 0, SlotActionType.QUICK_MOVE, client?.player)
-                        if(handler.slots[0].hasStack() && !handler.slots[0].stack.isEmpty) {
-                            craftingProgress--
-                            client?.soundManager?.play(PositionedSoundInstance.master(SoundEvents.ENTITY_VILLAGER_NO, random.nextFloat() * 0.1f + 0.9f))
-                        }else{
-                            client?.soundManager?.play(PositionedSoundInstance.master(SoundEvents.BLOCK_SMITHING_TABLE_USE, random.nextFloat() * 0.1f + 0.9f))
-                        }
-                    }else{
-                        craftingProgress -= 2
-                        client?.soundManager?.play(PositionedSoundInstance.master(SoundEvents.ENTITY_VILLAGER_NO, random.nextFloat() * 0.1f + 0.9f))
-                    }
-                }else{
-                    var craftingTableEmpty = true
-                        (1..9).forEach { slot ->
-                            if(handler.slots[slot].hasStack() && !handler.slots[slot].stack.isEmpty) {
-                                client?.interactionManager?.clickSlot(handler.syncId, slot, 0, SlotActionType.QUICK_MOVE, client?.player)
-                                if(handler.slots[slot].hasStack() && !handler.slots[slot].stack.isEmpty) {
-                                    craftingTableEmpty = false
-                                }
-                            }
-                        }
-                    if(craftingTableEmpty) {
-                        val recipe = recipeHistory[craftingProgress / 2]
-                        client?.networkHandler?.sendPacket(CraftRequestC2SPacket(handler.syncId, recipe, false))
-                        client?.soundManager?.play(PositionedSoundInstance.master(SoundEvents.ENTITY_ITEM_FRAME_ADD_ITEM, 1.0f))
-                    }else{
-                        craftingProgress--
-                        client?.soundManager?.play(PositionedSoundInstance.master(SoundEvents.ENTITY_VILLAGER_NO, random.nextFloat() * 0.1f + 0.9f))
-                    }
-                }
-                if(++craftingProgress == recipeHistory.size*2) {
-                    crafting = false
-                    client?.player?.dropItem(selectedCrafting.recipe.output, false)
-                    client?.player?.let(handler::populateRecipes)
-                }
-            }
-        }*/
         }
         internalTick++
     }
