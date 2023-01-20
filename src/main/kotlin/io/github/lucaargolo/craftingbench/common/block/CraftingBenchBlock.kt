@@ -131,7 +131,7 @@ class CraftingBenchBlock(settings: Settings) : BlockWithEntity(settings) {
                 Type.TOOLBOX -> pos.down().offset(sideDirection, -1)
             }
             world.getBlockEntity(blockEntityPos, BlockEntityCompendium.CRAFTING_BENCH).getOrNull()?.let { blockEntity ->
-                CraftingBenchScreenHandler(syncId, inventory, blockEntity.craftingInventory, blockEntity.inventory, ScreenHandlerContext.create(world, pos))
+                CraftingBenchScreenHandler(syncId, inventory, ScreenHandlerContext.create(world, pos))
             }
         }, TITLE)
     }

@@ -355,7 +355,7 @@ class CraftingBenchScreen(handler: CraftingBenchScreenHandler, inventory: Player
                     val inputs = recipe.ingredients[slot].matchingStacks[0]
                     (1..36).forEach { pSlots ->
                         val playerItems = playerInventory?.getStack(pSlots)
-                        if (ItemStack.areItemsEqual(inputs, playerItems) && !inputs.isEmpty && !playerItems?.isEmpty!!) {
+                        if (ItemStack.areItemsEqual(playerItems, inputs) && !inputs.isEmpty && !playerItems?.isEmpty!!) {
                             val output = ItemStack(recipe.output.item)
                             val playerInputSlot = playerInventory.getSlotWithStack(inputs)
                             CraftingBench.LOGGER.info("Input slots: $playerInputSlot")

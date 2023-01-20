@@ -5,7 +5,6 @@ import io.github.lucaargolo.craftingbench.client.CraftingBenchClient
 import io.github.lucaargolo.craftingbench.client.screen.CraftingBenchScreen
 import io.github.lucaargolo.craftingbench.common.recipes.TestRecipe
 import io.github.lucaargolo.craftingbench.utils.RecipeTree
-import io.github.lucaargolo.craftingbench.utils.SimpleCraftingInventory
 import it.unimi.dsi.fastutil.ints.Int2IntArrayMap
 import it.unimi.dsi.fastutil.ints.IntList
 import net.minecraft.client.MinecraftClient
@@ -18,11 +17,6 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SimpleInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
-import net.minecraft.recipe.Recipe
-import net.minecraft.recipe.RecipeMatcher
-import net.minecraft.recipe.RecipeType
-import net.minecraft.recipe.book.RecipeBookCategory
-import net.minecraft.screen.AbstractRecipeScreenHandler
 import net.minecraft.screen.ScreenHandler
 import net.minecraft.screen.ScreenHandlerContext
 import net.minecraft.screen.ScreenHandlerListener
@@ -33,13 +27,11 @@ import net.minecraft.world.World
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
 
-class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: PlayerInventory, simpleCraftingInventory: SimpleInventory, val inventory: SimpleInventory, private val context: ScreenHandlerContext) : AbstractRecipeScreenHandler<CraftingInventory>(ScreenHandlerCompendium.CRAFTING_BENCH, syncId) {
+class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: PlayerInventory, val inventory: SimpleInventory, private val context: ScreenHandlerContext) : ScreenHandler(ScreenHandlerCompendium.CRAFTING_BENCH, syncId) {
 
-    constructor(syncId: Int, playerInventory: PlayerInventory, context: ScreenHandlerContext): this(syncId, playerInventory, SimpleInventory(9), SimpleInventory(28), context)
+    constructor(syncId: Int, playerInventory: PlayerInventory, context: ScreenHandlerContext): this(syncId, playerInventory, SimpleInventory(28), context)
 
     private val recipeFinder = RecipeFinder()
-    private val craftingInventory = SimpleCraftingInventory(this, 3, 3, simpleCraftingInventory)
-    private val result = CraftingResultInventory()
 
     val craftableRecipes = mutableMapOf<TestRecipe, Pair<List<TestRecipe>, List<IntList>>>()
     val combinedInventory = object: Inventory {
@@ -108,14 +100,6 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
             override fun onPropertyUpdate(handler: ScreenHandler?, property: Int, value: Int) = Unit
         })
 
-/*        addSlot(CraftingResultSlot(playerInventory.player, craftingInventory, result, 0, 283 + 105, 35))
-
-        repeat(3) { n ->
-            repeat(3) { m ->
-                addSlot(Slot(craftingInventory, m + n * 3, 189 + 105 + m * 18, 17 + n * 18))
-            }
-        }*/
-
         repeat(4) { n ->
             repeat(7) { m ->
                 addSlot(Slot(inventory, m + n * 7, 184 + 105 + m * 18, 84 + n * 18))
@@ -140,30 +124,6 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
         val player = playerInventory.player
         if(player.world.isClient) {
             (playerInventory.player as? ClientPlayerEntity)?.also(::populateRecipes)
-        }
-    }
-
-    private fun updateResult(handler: ScreenHandler, world: World, player: PlayerEntity, craftingInventory: CraftingInventory, resultInventory: CraftingResultInventory) {
-        if (!world.isClient) {
-            val serverPlayerEntity = player as? ServerPlayerEntity
-            var itemStack = ItemStack.EMPTY
-            //Тут меняем тип
-            val optional = serverPlayerEntity?.server?.recipeManager?.getFirstMatch(RecipeType.CRAFTING, craftingInventory, world)
-            if (optional?.isPresent == true) {
-                val craftingRecipe = optional.get()
-                if (resultInventory.shouldCraftRecipe(world, serverPlayerEntity, craftingRecipe)) {
-                    itemStack = craftingRecipe.craft(craftingInventory)
-                }
-            }
-            resultInventory.setStack(0, itemStack)
-            handler.setPreviousTrackedSlot(0, itemStack)
-            serverPlayerEntity?.networkHandler?.sendPacket(ScreenHandlerSlotUpdateS2CPacket(handler.syncId, handler.nextRevision(), 0, itemStack))
-        }
-    }
-
-    override fun onContentChanged(inventory: Inventory?) {
-        context.run { world, _ ->
-            updateResult(this, world, playerInventory.player, craftingInventory, result)
         }
     }
 
@@ -214,47 +174,6 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
        }, true)
     }
 
-    override fun populateRecipeFinder(finder: RecipeMatcher) {
-        repeat(inventory.size()) { slot ->
-            finder.addUnenchantedInput(inventory.getStack(slot))
-        }
-        craftingInventory.provideRecipeInputs(finder)
-    }
-
-    override fun clearCraftingSlots() {
-        craftingInventory.clear()
-        result.clear()
-    }
-
-    override fun matches(recipe: Recipe<in CraftingInventory?>): Boolean {
-        return recipe.matches(craftingInventory, playerInventory.player.world)
-    }
-
-    override fun getCraftingResultSlotIndex(): Int {
-        return 0
-    }
-
-    override fun getCraftingWidth(): Int {
-        return craftingInventory.width
-    }
-
-    override fun getCraftingHeight(): Int {
-        return craftingInventory.height
-    }
-
-    override fun getCraftingSlotCount(): Int {
-        return 10
-    }
-
-
-    override fun getCategory(): RecipeBookCategory {
-        return RecipeBookCategory.CRAFTING
-    }
-
-    override fun canInsertIntoSlot(index: Int): Boolean {
-        return index != craftingResultSlotIndex
-    }
-
     override fun close(player: PlayerEntity) {
         super.close(player)
         recipeFinder.stop()
@@ -267,6 +186,7 @@ class CraftingBenchScreenHandler(syncId: Int, private val playerInventory: Playe
             val stack = player.inventory.getStack(slot)
             val itemId = Registry.ITEM.getRawId(stack.item)
             recipeFinder.rawItemInv.put(itemId, recipeFinder.rawItemInv.get(itemId)+stack.count)
+            CraftingBench.LOGGER.info("Population recipe $stack $itemId")
         }
         repeat(inventory.size()) { slot ->
             val stack = inventory.getStack(slot)

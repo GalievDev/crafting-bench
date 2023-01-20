@@ -3,7 +3,7 @@ package io.github.lucaargolo.craftingbench.common.recipes
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
-import net.minecraft.inventory.SimpleInventory
+import net.minecraft.inventory.CraftingInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.recipe.*
@@ -17,7 +17,7 @@ import net.minecraft.world.World
 class TestRecipe(
     idIn: Identifier, tier: Int, experienceIn: Float, time: Int, ingredientIn: DefaultedList<Ingredient>,
     resultIn: ItemStack
-) : Recipe<SimpleInventory> {
+) : Recipe<CraftingInventory>{
     private val id: Identifier
     private val tier: Int
     private val experience: Float
@@ -34,8 +34,8 @@ class TestRecipe(
         result = resultIn
     }
 
-    override fun matches(pContainer: SimpleInventory?, pLevel: World?): Boolean {
-        for (i in 0..pContainer?.size()!!) {
+    override fun matches(pContainer: CraftingInventory, pLevel: World): Boolean {
+        for (i in 0 until pContainer.size()) {
             if (ingredient[i].test(pContainer.getStack(i))) {
                 return true
             }
@@ -56,7 +56,7 @@ class TestRecipe(
         return true
     }
 
-    override fun craft(inventory: SimpleInventory?): ItemStack {
+    override fun craft(inventory: CraftingInventory?): ItemStack {
         return result
     }
 

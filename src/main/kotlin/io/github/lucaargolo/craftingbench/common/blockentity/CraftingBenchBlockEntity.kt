@@ -18,12 +18,7 @@ import net.minecraft.util.math.BlockPos
 
 class CraftingBenchBlockEntity(blockPos: BlockPos, blockState: BlockState) : LockableContainerBlockEntity(BlockEntityCompendium.CRAFTING_BENCH, blockPos, blockState) {
 
-    var craftingInventory = object: SimpleInventory(9) {
-        override fun markDirty() {
-            this@CraftingBenchBlockEntity.markDirty()
-            super.markDirty()
-        }
-    }
+
     var inventory = object: SimpleInventory(28) {
         override fun markDirty() {
             this@CraftingBenchBlockEntity.markDirty()
@@ -33,18 +28,16 @@ class CraftingBenchBlockEntity(blockPos: BlockPos, blockState: BlockState) : Loc
 
     override fun writeNbt(nbt: NbtCompound) {
         super.writeNbt(nbt)
-        nbt.put("craftingInventory", Inventories.writeNbt(NbtCompound(), craftingInventory.stacks))
         nbt.put("inventory", Inventories.writeNbt(NbtCompound(), inventory.stacks))
     }
 
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
-        Inventories.readNbt(nbt.getCompound("craftingInventory"), craftingInventory.stacks)
         Inventories.readNbt(nbt.getCompound("inventory"), inventory.stacks)
     }
 
     override fun createScreenHandler(syncId: Int, playerInventory: PlayerInventory): ScreenHandler {
-        return CraftingBenchScreenHandler(syncId, playerInventory, craftingInventory, inventory, ScreenHandlerContext.create(world, pos))
+        return CraftingBenchScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(world, pos))
     }
 
     override fun canPlayerUse(player: PlayerEntity): Boolean {
